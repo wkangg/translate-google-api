@@ -1,15 +1,12 @@
-
-var translate_1 = require("./src/translate");
+const trans = require('./src/translate');
 
 function translate(value, options) {
-  var text;
-  if (typeof value === 'string') {
+  let text;
+  if (typeof value === 'string')
     text = [value];
-  }
-  else {
+  else
     text = value;
-  }
-  return translate_1.default(text, options);
+  return trans.default(text, options);
 }
 
 module.exports = translate;

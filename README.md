@@ -22,7 +22,7 @@ npm install --save @william5553/translate-google-api
 
 Single segment
 ```javascript
-import translate from 'translate-google-api';
+import translate from '@william5553/translate-google-api';
 const result = await translate(`I'm fine.`, {
   tld: "cn",
   to: "vi",
@@ -34,7 +34,7 @@ const result = await translate(`I'm fine.`, {
 
 Multi-segment text
 ```javascript
-import translate from 'translate-google-api';
+import translate from '@william5553/translate-google-api';
 
 const result = await translate(['Hi', 'How are you?', `I'm fine`], {
   tld: "cn",

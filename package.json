@@ -1,16 +1,18 @@
 {
   "name": "@william5553/translate-google-api",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A free and unlimited API for Google Translate （contains single and multiple）",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+	"lint": "eslint . --ext js",
+    "lint:fix": "eslint . --fix --ext js"
   },
   "keywords": [
     "google",
     "translate",
-	"googletranslate",
-	"google-translate"
+    "googletranslate",
+    "google-translate"
   ],
   "repository": "github:William5553/translate-google-api",
   "author": "William5553",
@@ -19,7 +21,11 @@
     "axios": "^0.21.1"
   },
   "bugs": {
-    "url": "https://github.com/William5553/triv/issues"
+    "url": "https://github.com/William5553/translate-google-api/issues"
   },
-  "homepage": "https://github.com/William5553/triv"
+  "homepage": "https://github.com/William5553/translate-google-api",
+  "devDependencies": {
+    "eslint": "^7.22.0",
+    "eslint-plugin-node": "^11.1.0"
+  }
 }
