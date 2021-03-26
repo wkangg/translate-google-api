@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const translateToken = require('./token');
-const language = require('./language');
+const lang = require('./language');
 const util = require('./util');
 
 function translate(data, options) {
@@ -9,12 +9,12 @@ function translate(data, options) {
   options.from = options.from || 'auto';
   options.to = options.to || 'en';
   if (options.from) {
-    if (!language.isSupport(options.from)) {
+    if (!lang.isSupport(options.from)) {
       e = new Error();
       e.language = options.from;
     }
   }
-  if (!language.isSupport(options.to)) {
+  if (!lang.isSupport(options.to)) {
     e = new Error();
     e.language = options.to;
   }
@@ -26,7 +26,7 @@ function translate(data, options) {
     });
   }
 
-  const tld = options.tld || 'com';
+  var tld = options.tld || 'com';
   return translateToken
     .get(data.join(''), {
       tld: tld,

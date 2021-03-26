@@ -7,9 +7,12 @@ function arrayStringify(data) {
 
 exports.arrayStringify = arrayStringify;
 function parseMultiple(list) {
-  const translateMap = list.map(function(item) {
-    return item[0].trim();
-  });
-  return translateMap.join(' ').split(JOIN_WITH).map(item => item.trim());
+  return list
+    .map(item => {
+      return item[0].trim();
+    })
+    .join(' ')
+    .split(JOIN_WITH)
+    .map(item => item.trim());
 }
 exports.parseMultiple = parseMultiple;

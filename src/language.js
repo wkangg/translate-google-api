@@ -120,19 +120,15 @@ function isSupport(language) {
 }
 exports.isSupport = isSupport;
 function getCode(language) {
-  if (!language) {
+  if (!language)
     return false;
-  }
-  if (langs[language]) {
+  if (langs[language])
     return langs[language];
-  }
-  var keys = Object.keys(langs).filter(function(item) {
-    var lowerLan = language.toLowerCase();
-    return langs[item] === lowerLan;
+  var keys = Object.keys(langs).filter(item => {
+    return langs[item] === language.toLowerCase();
   });
-  if (keys[0]) {
+  if (keys[0])
     return langs[keys[0]];
-  }
   return false;
 }
 exports.getCode = getCode;
