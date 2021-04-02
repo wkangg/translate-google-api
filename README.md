@@ -1,4 +1,4 @@
-# translate-google-api
+# @william5553/translate-google-api
 
 Forked from [Binhluan1234/translate-google-api](https://github.com/Binhluan1234/translate-google-api)
 
