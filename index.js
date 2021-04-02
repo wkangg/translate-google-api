@@ -1,4 +1,3 @@
-
 const trans = require('./src/translate');
 
 function translate(value, options) {
