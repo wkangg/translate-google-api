@@ -46,7 +46,7 @@ const result = await translate(['Hi', 'How are you?', `I'm fine`], {
 
 Proxy
 
-proxy-config [https://github.com/axios/axios#request-config](https://github.com/axios/axios#request-config)
+[Configuring the proxy](https://github.com/axios/axios#request-config)
 ```javascript
 const result = await translate([`I'm fine. And you?`,`I'm ok.`], {
   tld: "cn",
