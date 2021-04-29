@@ -2,7 +2,7 @@
 
 Forked from [Binhluan1234/translate-google-api](https://github.com/Binhluan1234/translate-google-api)
 
-A free and unlimited API for Google Translate（support single text and Multi-segment text） 💵🚫
+A free and unlimited API for Google Translate （supports single text and Multi-segment text） 💵🚫
 # Feature
 
 - Multi-segment text support
