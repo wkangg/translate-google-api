@@ -1,12 +1,11 @@
 {
   "name": "@william5553/translate-google-api",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A free and unlimited API for Google Translate （contains single and multiple）",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint . --ext js",
-    "lint:fix": "eslint . --fix --ext js"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --fix --ext .js,.jsx,.ts,.tsx"
   },
   "keywords": [
     "google",
@@ -15,7 +14,7 @@
     "google-translate"
   ],
   "repository": "github:William5553/translate-google-api",
-  "author": "William5553",
+  "author": "William Kang <contact@williamk.ga>",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.1"
