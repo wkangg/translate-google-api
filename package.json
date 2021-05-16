@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/William5553/translate-google-api",
   "devDependencies": {
-    "eslint": "^7.25.0",
+    "eslint": "^7.26.0",
     "eslint-plugin-node": "^11.1.0"
   }
 }
