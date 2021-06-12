@@ -7,7 +7,7 @@
  * See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
  */
 Object.defineProperty(exports, '__esModule', { value: true });
-var langs = {
+const langs = {
   Automatic: 'auto',
   Afrikaans: 'af',
   Albanian: 'sq',
@@ -124,7 +124,7 @@ function getCode(language) {
     return false;
   if (langs[language])
     return langs[language];
-  var keys = Object.keys(langs).filter(item => {
+  const keys = Object.keys(langs).filter(item => {
     return langs[item] === language.toLowerCase();
   });
   if (keys[0])
