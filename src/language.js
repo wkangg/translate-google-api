@@ -7,6 +7,7 @@
  * See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
  */
 Object.defineProperty(exports, '__esModule', { value: true });
+
 const langs = {
   Automatic: 'auto',
   Afrikaans: 'af',
@@ -115,11 +116,12 @@ const langs = {
   Yoruba: 'yo',
   Zulu: 'zu'
 };
-function isSupport(language) {
-  return Boolean(getCode(language));
-}
-exports.isSupport = isSupport;
-function getCode(language) {
+
+exports.isSupport = language => {
+  return Boolean(exports.getCode(language));
+};
+
+exports.getCode = language => {
   if (!language)
     return false;
   if (langs[language])
@@ -130,16 +132,16 @@ function getCode(language) {
   if (keys[0])
     return langs[keys[0]];
   return false;
-}
-exports.getCode = getCode;
-function getAllLanguage() {
+};
+
+exports.getAllLanguage = () => {
   return Object.keys(langs);
-}
-exports.getAllLanguage = getAllLanguage;
-function getAllCode() {
-  return Object.keys(langs).map(function(item) {
+};
+
+exports.getAllCode = () => {
+  return Object.keys(langs).map(item => {
     return langs[item]; 
   });
-}
-exports.getAllCode = getAllCode;
+};
+
 exports.default = langs;

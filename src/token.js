@@ -2,34 +2,32 @@
  * Last update: 2016/06/26
  * https://translate.google.com/translate/releases/twsfe_w_20160620_RC00/r/js/desktop_module_main.js
  *
- * Everything between 'BEGIN' and 'END' was copied from the url above.
  * fork from https://github.com/vitalets/google-translate-token
  * for support brower
  */
 
 const axios = require('axios');
 
-
-function sM(a) {
-  var b;
+const sM = a => {
+  let b, c;
   if (yr !== null)
     b = yr;
   else {
     b = wr(String.fromCharCode(84));
-    var c = wr(String.fromCharCode(75));
+    c = wr(String.fromCharCode(75));
     b = [b(), b()];
     b[1] = c();
     b = (yr = window[b.join(c())] || '') || '';
   }
-  var d = wr(String.fromCharCode(116)),
-    c = wr(String.fromCharCode(107)),
-    d = [d(), d()];
+  let d = wr(String.fromCharCode(116));
+  c = wr(String.fromCharCode(107));
+  d = [d(), d()];
   d[1] = c();
   c = '&' + d.join('') + '=';
   d = b.split('.');
   b = Number(d[0]) || 0;
   for (var e = [], f = 0, g = 0; g < a.length; g++) {
-    var l = a.charCodeAt(g);
+    let l = a.charCodeAt(g);
     l < 128 ? e[f++] = l : (l < 2048 ? e[f++] = l >> 6 | 192 : ((l & 64512) == 55296 && g + 1 < a.length && (a.charCodeAt(g + 1) & 64512) == 56320 ? (l = 65536 + ((l & 1023) << 10) + (a.charCodeAt(++g) & 1023),
     e[f++] = l >> 18 | 240,
     e[f++] = l >> 12 & 63 | 128) : e[f++] = l >> 12 | 224,
@@ -45,32 +43,30 @@ function sM(a) {
   a < 0 && (a = (a & 2147483647) + 2147483648);
   a %= 1E6;
   return c + (a.toString() + '.' + (a ^ b));
-}
-
-var yr = null;
-var wr = function(a) {
-    return function() {
-      return a;
-    };
-  },
-  xr = function(a, b) {
-    for (var c = 0; c < b.length - 2; c += 3) {
-      var d = b.charAt(c + 2),
-        d = d >= 'a' ? d.charCodeAt(0) - 87 : Number(d),
-        d = b.charAt(c + 1) == '+' ? a >>> d : a << d;
-      a = b.charAt(c) == '+' ? a + d & 4294967295 : a ^ d;
-    }
-    return a;
-  };
-
-var window = {
-  TKK: '0'
 };
 
-function updateTKK(opts) {
-  opts = opts || {tld: 'com'};
-  return new Promise(function(resolve, reject) {
-    var now = Math.floor(Date.now() / 3600000);
+let yr = null;
+const wr = a => {
+  return () => {
+    return a;
+  };
+};
+const xr = (a, b) => {
+  for (let c = 0; c < b.length - 2; c += 3) {
+    let d = b.charAt(c + 2);
+    d = d >= 'a' ? d.charCodeAt(0) - 87 : Number(d);
+    d = b.charAt(c + 1) == '+' ? a >>> d : a << d;
+    a = b.charAt(c) == '+' ? a + d & 4294967295 : a ^ d;
+  }
+  return a;
+};
+
+const window = { TKK: '0' };
+
+const updateTKK = opts => {
+  opts = opts || { tld: 'com' };
+  return new Promise((resolve, reject) => {
+    const now = Math.floor(Date.now() / 3600000);
 
     if (Number(window.TKK.split('.')[0]) === now) {
       resolve();
@@ -78,37 +74,35 @@ function updateTKK(opts) {
       axios({
         url: 'https://translate.google.' + opts.tld,
         proxy: opts.proxy
-      }).then(function(res) {
-        var matches = res.data.match(/tkk:\s?'(.+?)'/i);
+      }).then(res => {
+        const matches = res.data.match(/tkk:\s?'(.+?)'/i);
 
         if (matches) {
           window.TKK = matches[1];
         }
 
         /**
-                 * Note: If the regex or the eval fail, there is no need to worry. The server will accept
-                 * relatively old seeds.
-                 */
+         * Note: If the regex or the eval fail, there is no need to worry. The server will accept
+         * relatively old seeds.
+         */
 
         resolve();
-      }).catch(function(err) {
-        var e = new Error();
+      }).catch(err => {
+        const e = new Error();
         e.code = 'BAD_NETWORK';
         e.message = err.message;
         reject(e);
       });
     }
   });
-}
+};
 
-function get(text, opts) {
-  return updateTKK(opts).then(function() {
-    var tk = sM(text);
+module.exports.get = (text, opts) => {
+  return updateTKK(opts).then(() => {
+    let tk = sM(text);
     tk = tk.replace('&tk=', '');
-    return {name: 'tk', value: tk};
-  }).catch(function(err) {
+    return { name: 'tk', value: tk };
+  }).catch(err => {
     throw err;
   });
-}
-
-module.exports.get = get;
+};
