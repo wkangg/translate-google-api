@@ -1,6 +1,6 @@
 {
   "name": "@william5553/translate-google-api",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A free and unlimited API for Google Translate （contains single and multiple）",
   "main": "index.js",
   "scripts": {
@@ -17,7 +17,7 @@
   "author": "William Kang <contact@williamk.ga>",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.21.1"
+    "axios": "^0.21.4"
   },
   "bugs": {
     "url": "https://github.com/William5553/translate-google-api/issues"
