@@ -9,26 +9,26 @@
 const axios = require('axios');
 
 const sM = a => {
-  let b, c;
+  let b, c, yr;
   if (yr !== null)
     b = yr;
   else {
-    b = wr(String.fromCodePoint(84));
-    c = wr(String.fromCodePoint(75));
+    b = wr(String.fromCharCode(84));
+    c = wr(String.fromCharCode(75));
     b = [b(), b()];
     b[1] = c();
     b = (yr = window[b.join(c())] || '') || '';
   }
-  let d = wr(String.fromCodePoint(116));
-  c = wr(String.fromCodePoint(107));
+  let d = wr(String.fromCharCode(116));
+  c = wr(String.fromCharCode(107));
   d = [d(), d()];
   d[1] = c();
   c = '&' + d.join('') + '=';
   d = b.split('.');
   b = Number(d[0]) || 0;
   for (var e = [], f = 0, g = 0; g < a.length; g++) {
-    let l = a.codePointAt(g);
-    l < 128 ? e[f++] = l : (l < 2048 ? e[f++] = l >> 6 | 192 : ((l & 64_512) == 55_296 && g + 1 < a.length && (a.codePointAt(g + 1) & 64_512) == 56_320 ? (l = 65_536 + ((l & 1023) << 10) + (a.codePointAt(++g) & 1023),
+    let l = a.charCodeAt(g);
+    l < 128 ? e[f++] = l : (l < 2048 ? e[f++] = l >> 6 | 192 : ((l & 64_512) == 55_296 && g + 1 < a.length && (a.charCodeAt(g + 1) & 64_512) == 56_320 ? (l = 65_536 + ((l & 1023) << 10) + (a.charCodeAt(++g) & 1023),
     e[f++] = l >> 18 | 240,
     e[f++] = l >> 12 & 63 | 128) : e[f++] = l >> 12 | 224,
     e[f++] = l >> 6 & 63 | 128),
@@ -45,7 +45,6 @@ const sM = a => {
   return c + (a.toString() + '.' + (a ^ b));
 };
 
-let yr;
 const wr = a => {
   return () => {
     return a;
@@ -55,7 +54,7 @@ const wr = a => {
 const xr = (a, b) => {
   for (let c = 0; c < b.length - 2; c += 3) {
     let d = b.charAt(c + 2);
-    d = d >= 'a' ? d.codePointAt(0) - 87 : Number(d);
+    d = d >= 'a' ? d.charCodeAt(0) - 87 : Number(d);
     d = b.charAt(c + 1) == '+' ? a >>> d : a << d;
     a = b.charAt(c) == '+' ? a + d & 4_294_967_295 : a ^ d;
   }
@@ -69,18 +68,16 @@ const updateTKK = opts => {
   return new Promise((resolve, reject) => {
     const now = Math.floor(Date.now() / 3_600_000);
 
-    if (Number(window.TKK.split('.')[0]) === now) {
+    if (Number(window.TKK.split('.')[0]) === now)
       resolve();
-    } else {
+    else {
       axios({
         url: 'https://translate.google.' + opts.tld,
         proxy: opts.proxy
       }).then(res => {
         const matches = res.data.match(/tkk:\s?'(.+?)'/i);
 
-        if (matches) {
-          window.TKK = matches[1];
-        }
+        if (matches) window.TKK = matches[1];
 
         /**
          * Note: If the regex or the eval fail, there is no need to worry. The server will accept
