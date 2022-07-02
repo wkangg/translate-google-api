@@ -1,13 +1,25 @@
 {
-  "parserOptions": {
-    "ecmaVersion": 2020
-  },
   "env": {
     "node": true,
-    "es6": true
+    "es2022": true
   },
-  "extends": ["eslint:recommended", "plugin:node/recommended"],
+  "extends": ["eslint:recommended", "plugin:node/recommended", "plugin:unicorn/recommended"],
+  "plugins": ["import"],
   "rules": {
+    "unicorn/prefer-top-level-await": "off",
+    "unicorn/prefer-string-replace-all": "error",
+    "unicorn/prevent-abbreviations": "off",
+    "unicorn/prefer-module": "off",
+    "unicorn/no-lonely-if": "off",
+    "unicorn/no-static-only-class": "off",
+    "unicorn/filename-case": "off",
+    "unicorn/prefer-spread": "off",
+    "unicorn/no-nested-ternary": "off",
+    "unicorn/consistent-destructuring": "off",
+    "unicorn/no-process-exit": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/no-array-reduce": "off",
+    "unicorn/no-array-for-each": "off",
     "node/file-extension-in-import": ["error", "always"],
     "node/prefer-global/buffer": ["error", "always"],
     "node/prefer-global/console": ["error", "always"],
@@ -24,6 +36,7 @@
     "no-lonely-if": "error",
     "no-extra-parens": "warn",
     "no-extra-semi": "warn",
+    "prefer-object-has-own": "error",
     "no-unreachable": "error",
     "brace-style": ["error", "1tbs"],
     "comma-dangle": ["error", "never"],
@@ -61,6 +74,29 @@
       {
         "destructuring": "all",
         "ignoreReadBeforeAssign": false
+      }
+    ],
+    "no-restricted-globals": [
+      "error",
+      {
+        "name": "Buffer",
+        "message": "Import Buffer from `node:buffer` instead"
+      },
+      {
+        "name": "process",
+        "message": "Import process from `node:process` instead"
+      },
+      {
+        "name": "setTimeout",
+        "message": "Import setTimeout from `node:timers` instead"
+      },
+      {
+        "name": "setInterval",
+        "message": "Import setInterval from `node:timers` instead"
+      },
+      {
+        "name": "setImmediate",
+        "message": "Import setImmediate from `node:timers` instead"
       }
     ]
   }

@@ -1,4 +1,3 @@
-'use strict';
 /**
  *
  * Generated from https://translate.google.com
@@ -122,26 +121,15 @@ exports.isSupport = language => {
 };
 
 exports.getCode = language => {
-  if (!language)
-    return false;
-  if (langs[language])
-    return langs[language];
-  const keys = Object.keys(langs).filter(item => {
-    return langs[item] === language.toLowerCase();
-  });
-  if (keys[0])
-    return langs[keys[0]];
-  return false;
+  if (!language) return false;
+  if (langs[language]) return langs[language];
+
+  const key = Object.keys(langs).find(item => langs[item] === language.toLowerCase());
+  return key ? langs[key] : false;
 };
 
-exports.getAllLanguage = () => {
-  return Object.keys(langs);
-};
+exports.getAllLanguage = () => Object.keys(langs);
 
-exports.getAllCode = () => {
-  return Object.keys(langs).map(item => {
-    return langs[item]; 
-  });
-};
+exports.getAllCode = () => Object.keys(langs).map(item => langs[item]);
 
 exports.default = langs;

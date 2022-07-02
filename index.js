@@ -1,10 +1,6 @@
-const trans = require('./src/translate');
+const translate = require('./src/translate');
 
 module.exports = (value, options) => {
-  let text;
-  if (typeof value === 'string')
-    text = [value];
-  else
-    text = value;
-  return trans.default(text, options);
+  const text = typeof value === 'string' ? [ value ] : value;
+  return translate.default(text, options);
 };

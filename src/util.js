@@ -1,4 +1,3 @@
-'use strict';
 const JOIN_WITH = '[]';
 Object.defineProperty(exports, '__esModule', { value: true });
 

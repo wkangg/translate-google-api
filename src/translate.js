@@ -6,24 +6,21 @@ const { arrayStringify, parseMultiple } = require('./util');
 
 module.exports.default = (data, options) => {
   let e;
-  options.from = options.from || 'auto';
-  options.to = options.to || 'en';
-  if (options.from) {
-    if (!isSupport(options.from)) {
-      e = new Error();
-      e.language = options.from;
-    }
-  }
-  if (!isSupport(options.to)) {
-    e = new Error();
-    e.language = options.to;
-  }
+
+  options.from = options.from ?? 'auto';
+  options.to = options.to ?? 'en';
+
+  if (options.from && !isSupport(options.from))
+    e = options.from;
+
+  if (!isSupport(options.to))
+    e = options.to;
+
   if (e) {
-    e.code = 400;
-    e.message = `The language ${e.language} is not supported`;
-    return new Promise((_, reject) => {
-      reject(e);
-    });
+    const error = new Error(`The language ${e} is not supported`);
+    error.code = 400;
+
+    throw error;
   }
 
   const tld = options.tld || 'com';
@@ -37,8 +34,8 @@ module.exports.default = (data, options) => {
         tl: options.to,
         hl: options.to,
         dt: 't',
-        ie: 'UTF-8',
-        oe: 'UTF-8',
+        ie: 'utf8',
+        oe: 'utf8',
         otf: 1,
         ssel: 0,
         tsel: 0,
@@ -65,9 +62,9 @@ module.exports.default = (data, options) => {
       return axios(extra)
         .then(response => {
           const res = parseMultiple(response.data[0]);
-          return Promise.resolve(res);
+          return res;
         }).catch(error => {
-          return Promise.reject(error);
+          throw error;
         });
     });
 };
