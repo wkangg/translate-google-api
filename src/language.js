@@ -114,9 +114,7 @@ const langs = {
   Zulu: 'zu'
 };
 
-exports.isSupported = language => {
-  return Boolean(exports.getCode(language));
-};
+exports.isSupported = language => Boolean(exports.getCode(language));
 
 exports.getCode = language => {
   if (!language) return false;

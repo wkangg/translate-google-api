@@ -4,7 +4,7 @@ const { get } = require('./token');
 const { isSupported } = require('./language');
 const { arrayStringify, parseMultiple } = require('./util');
 
-module.exports = (data, options) => {
+module.exports = (data, options = {}) => {
   let e;
 
   options.from = options.from ?? 'auto';
