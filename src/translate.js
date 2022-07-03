@@ -1,19 +1,19 @@
 const axios = require('axios');
 
 const { get } = require('./token');
-const { isSupport } = require('./language');
+const { isSupported } = require('./language');
 const { arrayStringify, parseMultiple } = require('./util');
 
-module.exports.default = (data, options) => {
+module.exports = (data, options) => {
   let e;
 
   options.from = options.from ?? 'auto';
   options.to = options.to ?? 'en';
 
-  if (options.from && !isSupport(options.from))
+  if (options.from && !isSupported(options.from))
     e = options.from;
 
-  if (!isSupport(options.to))
+  if (!isSupported(options.to))
     e = options.to;
 
   if (e) {
@@ -24,12 +24,12 @@ module.exports.default = (data, options) => {
   }
 
   const tld = options.tld || 'com';
-  return get(data.join(''), { tld, proxy: options.proxy || false })
+  return get(data.join(''), { tld, proxy: options.proxy ?? false })
     .then(res => {
       const text = arrayStringify(data);
       const url = '/translate_a/single';
       const query = {
-        client: options.client || 'gtx',
+        client: options.client ?? 'gtx',
         sl: options.from,
         tl: options.to,
         hl: options.to,
