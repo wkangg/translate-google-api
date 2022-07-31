@@ -1,6 +1,6 @@
 {
   "name": "@william5553/translate-google-api",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "A free and unlimited API for Google Translate （contains single and multiple）",
   "main": "index.js",
   "scripts": {
@@ -24,9 +24,9 @@
   },
   "homepage": "https://github.com/William5553/translate-google-api",
   "devDependencies": {
-    "eslint": "8.19.0",
+    "eslint": "8.20.0",
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-node": "11.1.0",
-    "eslint-plugin-unicorn": "43.0.0"
+    "eslint-plugin-unicorn": "43.0.2"
   }
 }

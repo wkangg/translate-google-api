@@ -114,18 +114,16 @@ const langs = {
   Zulu: 'zu'
 };
 
-exports.isSupported = language => Boolean(exports.getCode(language));
-
-exports.getCode = language => {
+const getCode = language => {
   if (!language) return false;
   if (langs[language]) return langs[language];
 
   const key = Object.keys(langs).find(item => langs[item] === language.toLowerCase());
-  return key ? langs[key] : false;
+  return key ? langs[key] : undefined;
 };
 
-exports.getAllLanguage = () => Object.keys(langs);
+const isSupported = language => Boolean(getCode(language));
 
-exports.getAllCode = () => Object.keys(langs).map(item => langs[item]);
-
-exports.default = langs;
+module.exports = langs;
+module.exports.isSupported = isSupported;
+module.exports.getCode = getCode;

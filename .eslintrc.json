@@ -6,6 +6,7 @@
   "extends": ["eslint:recommended", "plugin:node/recommended", "plugin:unicorn/recommended"],
   "plugins": ["import"],
   "rules": {
+    "unicorn/text-encoding-identifier-case": "off",
     "unicorn/prefer-top-level-await": "off",
     "unicorn/prefer-string-replace-all": "error",
     "unicorn/prevent-abbreviations": "off",

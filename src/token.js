@@ -77,7 +77,7 @@ const updateTKK = opts => {
   });
 };
 
-module.exports.get = (text, opts) => {
+module.exports.generateToken = (text, opts) => {
   return updateTKK(opts).then(() => {
     const tk = sM(text).replace('&tk=', '');
     return { name: 'tk', value: tk };
