@@ -2,9 +2,8 @@ const axios = require('axios');
 
 const { generateToken } = require('./token');
 const { isSupported } = require('./language');
-const { arrayStringify, parseMultiple } = require('./util');
 
-module.exports = async (data, options = {}) => {
+module.exports = async (text, options = {}) => {
   let error;
   [ options.from, options.to ].forEach(lang => {
     if (lang && !isSupported(lang)) {
@@ -21,9 +20,7 @@ module.exports = async (data, options = {}) => {
 
   const tld = options.tld ?? 'com';
 
-  const token = await generateToken(data.join(''), { tld, proxy: options.proxy ?? false });
-  const text = arrayStringify(data);
-  const url = '/translate_a/single';
+  const token = await generateToken(text, { tld, proxy: options.proxy ?? false });
   const params = {
     client: options.client ?? 'gtx',
     sl: options.from,
@@ -36,8 +33,8 @@ module.exports = async (data, options = {}) => {
     ssel: 0,
     tsel: 0,
     kc: 7,
-    [token.name]: token.value,
-    q: text
+    q: text,
+    [token.name]: token.value
   };
 
   const headers = {
@@ -46,20 +43,19 @@ module.exports = async (data, options = {}) => {
     'X-Requested-With': 'XMLHttpRequest'
   };
 
-  const extra = {
+  return axios({
     method: 'POST',
     headers,
     baseURL: `https://translate.google.${tld}`,
-    url,
+    url: '/translate_a/single',
     params,
     proxy: options.proxy ?? false
-  };
-
-  return axios(extra)
-    .then(response => {
-      const res = parseMultiple(response.data[0]);
-      return res;
-    }).catch(error => {
+  })
+    .then(response =>
+      response.data[0]
+        .map(item => item[0].trim())
+        .join(''))
+    .catch(error => {
       throw error;
     });
 };

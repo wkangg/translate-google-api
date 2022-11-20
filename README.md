@@ -2,7 +2,7 @@
 
 Forked from [Binhluan1234/translate-google-api](https://github.com/Binhluan1234/translate-google-api)
 
-A free and unlimited API for Google Translate （supports single text and Multi-segment text） 💵🚫
+A free and unlimited API for Google Translate  💵🚫
 # Feature
 
 - Multi-segment text support
@@ -20,43 +20,27 @@ npm install --save @william5553/translate-google-api
 
 # Usage
 
-Single segment
+Single-segment
 ```javascript
 const translate = require('@william5553/translate-google-api');
-const result = await translate(`I'm fine.`, {
-  tld: "cn",
-  to: "vi",
+const result = await translate('What time is it?', {
+  to: "vi"
 });
-// ["Tôi ổn."]
-
-
-```
-
-Multi-segment text
-```javascript
-const translate = require('@william5553/translate-google-api');
-
-const result = await translate(['Hi', 'How are you?', `I'm fine`], {
-  tld: "cn",
-  to: "vi",
-});
-//["Chào","Bạn khỏe không?","Tôi ổn."]
-
+// asdbjsadsajdsad
 ```
 
 Proxy
 
 [Configuring the proxy](https://github.com/axios/axios#request-config)
 ```javascript
-const result = await translate([`I'm fine. And you?`,`I'm ok.`], {
-  tld: "cn",
-  to: "vi",
+const result = await translate('How are you?', {
+  to: "fr",
   proxy: {
     host: '127.0.0.1',
-    port: 9000,
+    port: 6969,
     auth: {
-      username: 'mikeymike',
-      password: 'rapunz3l'
+      username: 'username',
+      password: 'password'
     }
   }
 });
@@ -84,12 +68,10 @@ The text language. Must be auto or one of the codes/names (not case sensitive) c
 **to**
 Type: `string` Default: en
 
-The language in which the text should be translated. Must be one of the codes/names (not case sensitive) contained in src/languages.ts.
+The language in which the text should be translated. Must be one of the codes/names (not case-sensitive) contained in src/languages.ts.
 
 **tld**
 Type: `string` 'com' | 'cn' <Default 'com'>
-
-`cn` is for China, `com` for others.
 
 **proxy**
 Type: `AxiosProxyConfig`

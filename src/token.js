@@ -47,6 +47,7 @@ const window = { TKK: '0' };
 
 const updateTKK = opts => {
   opts = opts ?? { tld: 'com' };
+
   return new Promise((resolve, reject) => {
     const now = Math.floor(Date.now() / 3_600_000);
  
