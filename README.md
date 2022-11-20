@@ -24,9 +24,9 @@ Single-segment
 ```javascript
 const translate = require('@william5553/translate-google-api');
 const result = await translate('What time is it?', {
-  to: "vi"
+  to: 'fr'
 });
-// asdbjsadsajdsad
+// Quelle heure est-il?
 ```
 
 Proxy
@@ -34,7 +34,7 @@ Proxy
 [Configuring the proxy](https://github.com/axios/axios#request-config)
 ```javascript
 const result = await translate('How are you?', {
-  to: "fr",
+  to: 'fr',
   proxy: {
     host: '127.0.0.1',
     port: 6969,
