@@ -5,12 +5,11 @@ Forked from [Binhluan1234/translate-google-api](https://github.com/Binhluan1234/
 A free and unlimited API for Google Translate  💵🚫
 # Feature
 
-- Multi-segment text support
 - Auto language detection
 - Language correction
 - Fast and reliable – it uses the same servers that [translate.google.com](https://translate.google.com/) uses
 - Free and unlimited (translate.google.com uses a token to authorize the requests. If you are not Google, you do not have this token and will have to pay [$20 per 1 million characters of text](https://cloud.google.com/translate/v2/pricing))
-- Supports: ReactJs, React-Native, NodeJs ...
+- Supports: React, React-Native, Node.js ...
 
 # Install
 
