@@ -6,7 +6,7 @@
  * for support brower
  */
 
-const axios = require('axios');
+import fetch from 'node-fetch';
 
 const sM = a => {
   let b, yr;
@@ -54,31 +54,30 @@ const updateTKK = opts => {
     if (Number(window.TKK.split('.')[0]) === now)
       resolve();
     else {
-      axios({
-        url: `https://translate.google.${opts.tld}`,
-        proxy: opts.proxy
-      }).then(res => {
-        const matches = res.data.match(/tkk:\s?'(.+?)'/i);
+      fetch(`https://translate.google.${opts.tld}/`)
+        .then(res => res.text())
+        .then(res => {
+          const matches = res.match(/tkk:\s?'(.+?)'/i);
  
-        if (matches)
-          window.TKK = matches[1];
+          if (matches)
+            window.TKK = matches[1];
  
-        /**
+          /**
           * Note: If the regex or the eval fail, there is no need to worry. The server will accept
           * relatively old seeds.
           */
  
-        resolve();
-      }).catch(error => {
-        const e = new Error(error.message);
-        e.code = 'BAD_NETWORK';
-        reject(e);
-      });
+          resolve();
+        }).catch(error => {
+          const e = new Error(error.message);
+          e.code = 'BAD_NETWORK';
+          reject(e);
+        });
     }
   });
 };
 
-module.exports.generateToken = (text, opts) => {
+export const generateToken = (text, opts) => {
   return updateTKK(opts).then(() => {
     const tk = sM(text).replace('&tk=', '');
     return { name: 'tk', value: tk };

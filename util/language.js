@@ -5,7 +5,7 @@
  * The languages that Google Translate supports (as of 5/15/16) alongside with their ISO 639-1 codes
  * See https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
  */
-const langs = {
+export const langs = {
   Automatic: 'auto',
   Afrikaans: 'af',
   Albanian: 'sq',
@@ -114,7 +114,7 @@ const langs = {
   Zulu: 'zu'
 };
 
-const getCode = language => {
+export const getCode = language => {
   if (!language) return false;
   if (langs[language]) return langs[language];
 
@@ -122,8 +122,4 @@ const getCode = language => {
   return key ? langs[key] : undefined;
 };
 
-const isSupported = language => Boolean(getCode(language));
-
-module.exports = langs;
-module.exports.isSupported = isSupported;
-module.exports.getCode = getCode;
+export const isSupported = language => Boolean(getCode(language));

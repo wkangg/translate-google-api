@@ -20,30 +20,18 @@ npm install --save @william5553/translate-google-api
 
 # Usage
 
-Single-segment
 ```javascript
-const translate = require('@william5553/translate-google-api');
+const { translate } = require('@william5553/translate-google-api');
 const result = await translate('What time is it?', {
   to: 'fr'
 });
-// Quelle heure est-il?
 ```
-
-Proxy
-
-[Configuring the proxy](https://github.com/axios/axios#request-config)
-```javascript
-const result = await translate('How are you?', {
-  to: 'fr',
-  proxy: {
-    host: '127.0.0.1',
-    port: 6969,
-    auth: {
-      username: 'username',
-      password: 'password'
-    }
-  }
-});
+Returns
+```json
+{
+  text: 'Quelle heure est-il?',
+  from: { language: { didYouMean: false, iso: 'en' }, text: { value: '' } }
+}
 ```
 
 # API
@@ -52,7 +40,7 @@ const result = await translate('How are you?', {
 
 ### text
 
-Type: `string`, `array`
+Type: `string`
 
 The text to be translated
 
@@ -60,25 +48,22 @@ The text to be translated
 
 Type: object
 
-**from？**
+**from**
 Type: `string` Default: auto
 
-The text language. Must be auto or one of the codes/names (not case sensitive) contained in src/languages.ts
+The text language. Must be auto or one of the codes/names (not case sensitive) contained in util/languages.js
 
 **to**
 Type: `string` Default: en
 
-The language in which the text should be translated. Must be one of the codes/names (not case-sensitive) contained in src/languages.ts.
+The language in which the text should be translated. Must be one of the codes/names (not case-sensitive) contained in util/languages.js.
+
+**raw**
+Type: `boolean` Default: false
+
+Whether to return the raw response from Google Translate.
 
 **tld**
-Type: `string` 'com' | 'cn' <Default 'com'>
+Type: `string` Default: com
 
-**proxy**
-Type: `AxiosProxyConfig`
-
-proxy for request.
-
-**config**
-Type: `object`
-
-config for [axios](https://github.com/axios/axios)
+The TLD for Google Translate. (ex. translate.google.**com**)
