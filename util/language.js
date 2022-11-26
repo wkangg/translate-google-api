@@ -118,7 +118,8 @@ export const getCode = language => {
   if (!language) return false;
   if (langs[language]) return langs[language];
 
-  const key = Object.keys(langs).find(item => langs[item] === language.toLowerCase());
+  const key = Object.keys(langs).find(item => langs[item] === language.toLowerCase() || item.toLowerCase === language.toLowerCase());
+
   return key ? langs[key] : undefined;
 };
 
