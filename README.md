@@ -20,7 +20,7 @@ npm install --save @william5553/translate-google-api
 # Usage
 
 ```javascript
-const { translate } = require('@william5553/translate-google-api');
+const { translate } = await import('@william5553/translate-google-api');
 const result = await translate('What time is it?', {
   to: 'fr'
 });
@@ -28,8 +28,16 @@ const result = await translate('What time is it?', {
 Returns
 ```json
 {
-  text: 'Quelle heure est-il?',
-  from: { language: { didYouMean: false, iso: 'en' }, text: { value: '' } }
+   "text": "Quelle heure est-il?",
+   "from": {
+      "language": {
+         "didYouMean": false,
+         "iso": "en"
+      },
+      "text": {
+         "value": ""
+      }
+   }
 }
 ```
 
