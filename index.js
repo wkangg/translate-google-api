@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { generateToken } from './util/token.js';
-import { isSupported } from './util/language.js';
+import { isSupported, getCode } from './util/language.js';
 
 export const translate = async (text, options = {}) => {
   let error;
@@ -12,10 +12,8 @@ export const translate = async (text, options = {}) => {
     }
   });
 
-  if (!Object.hasOwn(options, 'from'))
-    options.from = 'auto';
-  if (!Object.hasOwn(options, 'to'))
-    options.to = 'en';
+  options.from = Object.hasOwn(options, 'from') ? getCode(options.from) : 'auto';
+  options.to = Object.hasOwn(options, 'to') ? getCode(options.to) : 'en';
 
   const tld = options.tld ?? 'com';
 
