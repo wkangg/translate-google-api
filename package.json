@@ -1,6 +1,6 @@
 {
   "name": "@william5553/translate-google-api",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "A free and unlimited API for Google Translate",
   "main": "index.js",
   "type": "module",
