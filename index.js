@@ -52,7 +52,6 @@ export const translate = async (text, options = {}) => {
         text: '',
         from: {
           language: {
-            didYouMean: false,
             iso: ''
           },
           text: {
@@ -65,12 +64,10 @@ export const translate = async (text, options = {}) => {
         if (obj[0]) result.text += obj[0];
       });
     
-      if (body[2] === body[8][0][0])
-        result.from.language.iso = body[2];
-      else {
-        result.from.language.didYouMean = true;
-        result.from.language.iso = body[8][0][0];
-      }
+      result.from.language.iso = body[2];
+      
+      if (body[2] !== body[8][0][0])
+        result.from.language.didYouMean = body[8][0][0];
     
       if (body[7] && body[7][0]) {
         result.from.text.value = body[7][0]
