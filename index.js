@@ -20,9 +20,9 @@ export const translate = async (text, options = {}) => {
   const token = await generateToken(text, { tld });
   const params = {
     client: options.client ?? 'gtx',
-    sl: options.from,
-    tl: options.to,
-    hl: options.to,
+    sl: options.from ?? 'auto',
+    tl: options.to ?? 'en',
+    hl: options.to ?? 'en',
     ie: 'UTF-8',
     oe: 'UTF-8',
     otf: 1,

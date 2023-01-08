@@ -115,7 +115,7 @@ export const langs = {
 };
 
 export const getCode = language => {
-  if (!language) return false;
+  if (!language) return;
   if (langs[language]) return langs[language];
 
   const key = Object.keys(langs).find(item => langs[item] === language.toLowerCase() || item.toLowerCase() === language.toLowerCase());
