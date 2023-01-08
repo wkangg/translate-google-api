@@ -31,7 +31,6 @@ Returns
    "text": "Quelle heure est-il?",
    "from": {
       "language": {
-         "didYouMean": false,
          "iso": "en"
       },
       "text": {
