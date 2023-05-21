@@ -78,9 +78,6 @@ export const translate = async (text, options = {}) => {
       }
     
       return result;
-    })
-    .catch(error => {
-      throw error;
     });
 };
 

@@ -81,7 +81,5 @@ export const generateToken = (text, opts) => {
   return updateTKK(opts).then(() => {
     const tk = sM(text).replace('&tk=', '');
     return { name: 'tk', value: tk };
-  }).catch(error => {
-    throw error;
   });
 };
