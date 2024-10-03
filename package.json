@@ -29,7 +29,7 @@
   "homepage": "https://github.com/William5553/translate-google-api",
   "devDependencies": {
     "eslint": "8.31.0",
-    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-import": "2.31.0",
     "eslint-plugin-n": "15.6.0",
     "eslint-plugin-unicorn": "45.0.2"
   }
