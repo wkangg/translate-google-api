@@ -31,6 +31,6 @@
     "eslint": "8.31.0",
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-n": "15.6.0",
-    "eslint-plugin-unicorn": "45.0.2"
+    "eslint-plugin-unicorn": "56.0.1"
   }
 }
