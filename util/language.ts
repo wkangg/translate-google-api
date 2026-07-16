@@ -256,15 +256,20 @@ export const langs = {
     'Yucatec Maya': 'yua',
     'Zapotec': 'zap',
     'Zulu': 'zu'
-};
+} as const;
 
-export const getCode = language => {
+export type LanguageName = keyof typeof langs;
+export type LanguageCode = typeof langs[LanguageName];
+
+export const getCode = (language: string): LanguageCode | undefined => {
     if (!language) return;
-    if (langs[language]) return langs[language];
+    if (Object.hasOwn(langs, language)) return langs[language as LanguageName];
 
-    const key = Object.keys(langs).find(item => langs[item] === language.toLowerCase() || item.toLowerCase() === language.toLowerCase());
+    const normalized = language.toLowerCase();
+    const key = (Object.keys(langs) as LanguageName[])
+        .find(item => langs[item].toLowerCase() === normalized || item.toLowerCase() === normalized);
 
     return key ? langs[key] : undefined;
 };
 
-export const isSupported = language => Boolean(getCode(language));
+export const isSupported = (language: string): boolean => Boolean(getCode(language));

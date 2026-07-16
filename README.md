@@ -1,75 +1,69 @@
 # @william5553/translate-google-api
 
-Forked from [Binhluan1234/translate-google-api](https://github.com/Binhluan1234/translate-google-api)
+A dependency-free, fully typed client for the same translation endpoint used by
+[Google Translate](https://translate.google.com/). It supports automatic language detection,
+spelling corrections, custom Google domains, and raw responses.
 
-A free and unlimited API for Google Translate  💵🚫
-# Feature
+> This is an unofficial client. For applications that require a supported service-level
+> agreement, use the official Google Cloud Translation API.
 
-- Auto language detection
-- Language correction
-- Fast and reliable – it uses the same servers that [translate.google.com](https://translate.google.com/) uses
-- Free and unlimited (translate.google.com uses a token to authorize the requests. If you are not Google, you do not have this token and will have to pay [$20 per 1 million characters of text](https://cloud.google.com/translate/pricing))
-- Supports: React, React-Native, Node.js ...
+## Requirements
 
-# Install
+- Node.js 22 or newer, Bun, or another modern runtime with the Fetch API
+- ESM
+
+## Install
 
 ```shell
-npm install --save @william5553/translate-google-api
+npm install @william5553/translate-google-api
 ```
 
-# Usage
+## Usage
 
-```javascript
-const { translate } = await import('@william5553/translate-google-api');
-const result = await translate('What time is it?', {
-  to: 'fr'
-});
+```ts
+import { translate } from '@william5553/translate-google-api';
+
+const result = await translate('What time is it?', { to: 'fr' });
+console.log(result.text); // Quelle heure est-il ?
 ```
-Returns
-```json
-{
-   "text": "Quelle heure est-il?",
-   "from": {
-      "language": {
-         "iso": "en"
-      },
-      "text": {
-         "value": ""
-      }
-   }
+
+`translate()` returns:
+
+```ts
+interface TranslationResult {
+    text: string;
+    from: {
+        language: {
+            iso: string;
+            didYouMean?: string;
+        };
+        text: {
+            value: string;
+            autoCorrected?: boolean;
+            didYouMean?: boolean;
+        };
+    };
 }
 ```
 
-# API
+## API
 
-## translate(text, options)
+### `translate(text, options?)`
 
-### text
+- `text` (`string`): text to translate.
+- `options.from` (`string`, default `auto`): source language name or code.
+- `options.to` (`string`, default `en`): target language name or code.
+- `options.tld` (`string`, default `com`): Google Translate domain suffix, such as `ca`.
+- `options.client` (`string`, default `gtx`): Google Translate client identifier.
+- `options.raw` (`boolean`, default `false`): return Google's response without parsing it.
 
-Type: `string`
+Language names and codes are case-insensitive. The package also exports `langs`, `getCode`,
+`isSupported`, and `TranslateError`.
 
-The text to be translated
+```ts
+import { getCode, isSupported, langs } from '@william5553/translate-google-api';
 
-### options
-
-Type: object
-
-**from**
-Type: `string` Default: auto
-
-The text language. Must be auto or one of the codes/names (not case sensitive) contained in util/languages.js
-
-**to**
-Type: `string` Default: en
-
-The language in which the text should be translated. Must be one of the codes/names (not case-sensitive) contained in util/languages.js.
-
-**raw**
-Type: `boolean` Default: false
-
-Whether to return the raw response from Google Translate.
-
-**tld**
-Type: `string` Default: com
-
-The TLD for Google Translate. (ex. translate.google.**com**)
+getCode('French'); // 'fr'
+isSupported('fr'); // true
+console.log(langs);
+```
