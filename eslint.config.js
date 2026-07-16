@@ -1,6 +1,5 @@
 import eslint from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
-import globals from 'globals';
 import nodePlugin from 'eslint-plugin-n';
 import unicorn from 'eslint-plugin-unicorn';
 import tseslint from 'typescript-eslint';
@@ -66,7 +65,6 @@ export default tseslint.config(
     {
         files: ['**/*.{js,ts}'],
         plugins: { '@stylistic': stylistic },
-        languageOptions: { globals: globals.node },
         rules: sharedRules
     },
     {
