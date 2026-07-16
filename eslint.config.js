@@ -85,6 +85,7 @@ export default tseslint.config(
     {
         files: ['test/**/*.ts'],
         rules: {
+            'n/no-missing-import': ['error', { allowModules: ['bun:test'] }],
             'unicorn/no-global-object-property-assignment': 'off',
             'unicorn/no-unnecessary-global-this': 'off'
         }
