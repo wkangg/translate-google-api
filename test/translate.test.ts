@@ -108,4 +108,102 @@ describe('translate', () => {
             expect((error as TranslateError).code).toBe('BAD_NETWORK');
         }
     });
+
+    test('uses default options when none are provided', async () => {
+        const fetchMock = installFetch(Response.json(responseBody));
+
+        await translate('Hello');
+
+        const request = fetchMock.mock.calls
+            .map(([input]) => new URL(input instanceof Request ? input.url : input))
+            .find(url => url.pathname.endsWith('/translate_a/single'));
+        expect(request?.hostname).toBe('translate.google.com');
+        expect(request?.searchParams.get('sl')).toBe('auto');
+        expect(request?.searchParams.get('tl')).toBe('en');
+        expect(request?.searchParams.get('hl')).toBe('en');
+        expect(request?.searchParams.get('client')).toBe('gtx');
+    });
+
+    test('forwards a custom client option', async () => {
+        const fetchMock = installFetch(Response.json(responseBody));
+
+        await translate('Hello', { client: 'te' });
+
+        const request = fetchMock.mock.calls
+            .map(([input]) => new URL(input instanceof Request ? input.url : input))
+            .find(url => url.pathname.endsWith('/translate_a/single'));
+        expect(request?.searchParams.get('client')).toBe('te');
+    });
+
+    test('rejects unsupported source languages before making a request', async () => {
+        const fetchMock = mock(() => Promise.resolve(new Response()));
+        globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+        const error = await getRejection(translate('Hello', { from: 'Klingon' }));
+        expect(error).toEqual(
+            expect.objectContaining({ code: 400, name: 'TranslateError' })
+        );
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    test('omits optional correction fields when there is no suggestion', async () => {
+        const body = [
+            [['Bonjour']],
+            undefined,
+            'fr',
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            [['fr']]
+        ];
+        installFetch(Response.json(body));
+
+        const result = await translate('Bonjour', { to: 'French' });
+
+        expect(result).toEqual({
+            text: 'Bonjour',
+            from: {
+                language: { iso: 'fr' },
+                text: { value: '' }
+            }
+        });
+    });
+
+    test('flags a spelling suggestion that was not auto-corrected', async () => {
+        const body = [
+            [['Hello']],
+            undefined,
+            'en',
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            ['<b><i>Hello</i></b>', undefined, undefined, undefined, undefined, false],
+            [['en']]
+        ];
+        installFetch(Response.json(body));
+
+        const result = await translate('Helo');
+
+        expect(result.from.text).toEqual({ value: '[Hello]', didYouMean: true });
+    });
+
+    test('throws a typed error when the parsed response is not an array', async () => {
+        installFetch(Response.json({ unexpected: true }));
+
+        const error = await getRejection(translate('Hello'));
+        expect(error).toEqual(
+            expect.objectContaining({ code: 'BAD_RESPONSE', name: 'TranslateError' })
+        );
+    });
+
+    test('returns the raw response even when the body is malformed', async () => {
+        const malformed = { unexpected: true };
+        installFetch(Response.json(malformed));
+
+        const result = await translate('Hello', { raw: true });
+        expect(result).toEqual(malformed);
+    });
 });

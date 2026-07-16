@@ -19,4 +19,19 @@ describe('language helpers', () => {
         expect(langs.English).toBe('en');
         expect(langs['Baoulé']).toBe('bci');
     });
+
+    test('returns undefined for empty input', () => {
+        expect(getCode('')).toBeUndefined();
+        expect(isSupported('')).toBeFalse();
+    });
+
+    test('resolves hyphenated codes case-insensitively', () => {
+        expect(getCode('zh-cn')).toBe('zh-CN');
+        expect(getCode('ZH-CN')).toBe('zh-CN');
+    });
+
+    test('resolves language names containing parentheses regardless of case', () => {
+        expect(getCode('Chinese (Simplified)')).toBe('zh-CN');
+        expect(getCode('chinese (simplified)')).toBe('zh-CN');
+    });
 });
