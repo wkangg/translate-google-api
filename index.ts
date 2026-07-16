@@ -63,6 +63,14 @@ export async function translate(text: string): Promise<TranslationResult>;
 export async function translate(text: string, options: TranslateOptions & { raw: true }): Promise<unknown>;
 export async function translate(text: string, options: TranslateOptions & { raw?: false }): Promise<TranslationResult>;
 export async function translate(text: string, options: TranslateOptions): Promise<unknown>;
+/**
+ * Translates text using Google Translate.
+ *
+ * @param text - The text to translate
+ * @param options - Translation settings, including source and target languages, regional domain, client, and raw response mode
+ * @returns The structured translation result, or the unprocessed response when `options.raw` is `true`
+ * @throws `TranslateError` if a language is unsupported, the request fails, Google Translate returns an unsuccessful status, or the response has an invalid format
+ */
 export async function translate(text: string, options: TranslateOptions = {}): Promise<unknown> {
     for (const language of [options.from, options.to]) {
         if (language && !isSupported(language)) {
