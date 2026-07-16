@@ -1,4 +1,5 @@
 import { TranslateError } from '../errors.js';
+import { validateGoogleTld } from './tld.js';
 
 interface TokenOptions {
     tld?: string;
@@ -39,17 +40,26 @@ const calculateToken = (text: string): string => {
     return `${value}.${value ^ base}`;
 };
 
-const updateTkk = async ({ tld = 'com' }: TokenOptions): Promise<void> => {
+const updateTkk = async (options: TokenOptions): Promise<void> => {
+    const tld = validateGoogleTld(options.tld);
     const currentHour = Math.floor(Date.now() / 3_600_000);
     if (Number(tokenState.tkk.split('.', 1)[0]) === currentHour) return;
 
     try {
-        const response = await fetch(`https://translate.google.${tld}/`);
-        if (!response.ok) return;
+        const response = await fetch(`https://translate.google.${tld}/`, {
+            signal: AbortSignal.timeout(10_000)
+        });
+        if (!response.ok) {
+            throw new TranslateError(`Google Translate token refresh returned HTTP ${response.status}`, 'BAD_RESPONSE');
+        }
         const html = await response.text();
         const match = /tkk:\s?'(.+?)'/i.exec(html);
-        if (match?.[1]) tokenState.tkk = match[1];
+        if (!match?.[1]) {
+            throw new TranslateError('Google Translate returned an invalid token response', 'BAD_RESPONSE');
+        }
+        tokenState.tkk = match[1];
     } catch (error) {
+        if (error instanceof TranslateError) throw error;
         throw new TranslateError('Unable to refresh the Google Translate token', 'BAD_NETWORK', { cause: error });
     }
 };

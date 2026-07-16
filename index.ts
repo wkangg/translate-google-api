@@ -1,6 +1,7 @@
 import { generateToken } from './util/token.js';
 import { getCode, isSupported } from './util/language.js';
 import { TranslateError } from './errors.js';
+import { validateGoogleTld } from './util/tld.js';
 
 export interface TranslateOptions {
     client?: string;
@@ -26,6 +27,14 @@ export interface TranslationResult {
 }
 
 const getArray = (value: unknown): unknown[] => Array.isArray(value) ? value : [];
+
+const hasValidTranslationSegments = (body: unknown[]): boolean => {
+    const segments = body[0];
+    return Array.isArray(segments)
+        && segments.length > 0
+        && segments.every(segment => Array.isArray(segment))
+        && segments.some(segment => typeof segment[0] === 'string');
+};
 
 const parseResponse = (body: unknown[]): TranslationResult => {
     const segments = getArray(body[0]);
@@ -80,7 +89,7 @@ export async function translate(text: string, options: TranslateOptions = {}): P
 
     const from = options.from ? getCode(options.from) : 'auto';
     const to = options.to ? getCode(options.to) : 'en';
-    const tld = options.tld ?? 'com';
+    const tld = validateGoogleTld(options.tld);
     const token = await generateToken(text, { tld });
     const parameters = new URLSearchParams({
         client: options.client ?? 'gtx',
@@ -122,9 +131,14 @@ export async function translate(text: string, options: TranslateOptions = {}): P
         throw new TranslateError(`Google Translate returned HTTP ${response.status}`, 'BAD_RESPONSE');
     }
 
-    const body: unknown = await response.json();
+    let body: unknown;
+    try {
+        body = await response.json();
+    } catch (error) {
+        throw new TranslateError('Google Translate returned invalid JSON', 'BAD_RESPONSE', { cause: error });
+    }
     if (options.raw) return body;
-    if (!Array.isArray(body)) {
+    if (!Array.isArray(body) || !hasValidTranslationSegments(body)) {
         throw new TranslateError('Google Translate returned an invalid response', 'BAD_RESPONSE');
     }
 

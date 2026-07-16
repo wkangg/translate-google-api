@@ -18,7 +18,8 @@ const responseBody = [
 ];
 
 const installFetch = (translationResponse: Response) => {
-    const fetchMock = mock((input: string | URL | Request) => {
+    const fetchMock = mock((input: string | URL | Request, _init?: RequestInit) => {
+        void _init;
         const url = new URL(input instanceof Request ? input.url : input);
         if (url.pathname === '/') {
             return Promise.resolve(new Response(`tkk: '${currentHour}.0'`));
@@ -43,6 +44,26 @@ afterEach(() => {
 });
 
 describe('translate', () => {
+    test('rejects unsupported Google TLDs before making a request', async () => {
+        const fetchMock = mock(() => Promise.resolve(new Response()));
+        globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+        const error = await getRejection(translate('Hello', { tld: 'attacker.example' }));
+        expect(error).toEqual(
+            expect.objectContaining({ code: 400, name: 'TranslateError' })
+        );
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    test('rejects an unusable token response', async () => {
+        globalThis.fetch = mock(() => Promise.resolve(new Response('missing token'))) as unknown as typeof fetch;
+
+        const error = await getRejection(translate('Hello'));
+        expect(error).toEqual(
+            expect.objectContaining({ code: 'BAD_RESPONSE', name: 'TranslateError' })
+        );
+    });
+
     test('translates text and parses correction metadata', async () => {
         const fetchMock = installFetch(Response.json(responseBody));
         const options = { from: 'English', to: 'French', tld: 'ca' };
@@ -67,6 +88,9 @@ describe('translate', () => {
         expect(request?.searchParams.get('q')).toBe('Hello');
         expect(request?.searchParams.get('tk')).toMatch(/^\d+\.\d+$/);
         expect(request?.searchParams.getAll('dt')).toHaveLength(10);
+        const tokenRequest = fetchMock.mock.calls
+            .find(([input]) => new URL(input instanceof Request ? input.url : input).pathname === '/');
+        expect(tokenRequest?.[1]?.signal).toBeInstanceOf(AbortSignal);
     });
 
     test('returns the untouched response in raw mode', async () => {
@@ -90,6 +114,24 @@ describe('translate', () => {
 
     test('reports HTTP failures with a typed error', async () => {
         installFetch(new Response('unavailable', { status: 503 }));
+
+        const error = await getRejection(translate('Hello'));
+        expect(error).toEqual(
+            expect.objectContaining({ code: 'BAD_RESPONSE', name: 'TranslateError' })
+        );
+    });
+
+    test('reports JSON decoding failures with a typed error', async () => {
+        installFetch(new Response('{', { headers: { 'content-type': 'application/json' } }));
+
+        const error = await getRejection(translate('Hello'));
+        expect(error).toEqual(
+            expect.objectContaining({ code: 'BAD_RESPONSE', name: 'TranslateError' })
+        );
+    });
+
+    test('rejects responses without translation segments', async () => {
+        installFetch(Response.json([[]]));
 
         const error = await getRejection(translate('Hello'));
         expect(error).toEqual(

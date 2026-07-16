@@ -19,6 +19,15 @@ const withMockedHour = async <T>(hour: number, run: () => Promise<T>): Promise<T
     }
 };
 
+const getRejection = async (promise: Promise<unknown>): Promise<unknown> => {
+    try {
+        await promise;
+    } catch (error) {
+        return error;
+    }
+    throw new Error('Expected promise to reject');
+};
+
 afterEach(() => {
     globalThis.fetch = originalFetch;
 });
@@ -99,30 +108,30 @@ describe('generateToken', () => {
         });
     });
 
-    test('keeps working and retries later when the seed response is not ok', async () => {
+    test('rejects and retries later when the seed response is not ok', async () => {
         await withMockedHour(666666, async () => {
             const fetchMock = mock(() => Promise.resolve(new Response('rate limited', { status: 503 })));
             globalThis.fetch = fetchMock as unknown as typeof fetch;
 
-            const first = await generateToken('Hello');
-            const second = await generateToken('Hello');
+            const first = await getRejection(generateToken('Hello'));
+            const second = await getRejection(generateToken('Hello'));
 
-            expect(first.name).toBe('tk');
-            expect(second.name).toBe('tk');
-            // A non-ok response never updates the cached seed, so every call
-            // within the same hour keeps retrying instead of silently caching failure.
+            expect(first).toEqual(expect.objectContaining({ code: 'BAD_RESPONSE' }));
+            expect(second).toEqual(expect.objectContaining({ code: 'BAD_RESPONSE' }));
             expect(fetchMock).toHaveBeenCalledTimes(2);
         });
     });
 
-    test('keeps working and retries later when the seed response has no tkk match', async () => {
+    test('rejects and retries later when the seed response has no tkk match', async () => {
         await withMockedHour(777777, async () => {
             const fetchMock = mock(() => Promise.resolve(new Response('<html>no token here</html>')));
             globalThis.fetch = fetchMock as unknown as typeof fetch;
 
-            await generateToken('Hello');
-            await generateToken('Hello');
+            const first = await getRejection(generateToken('Hello'));
+            const second = await getRejection(generateToken('Hello'));
 
+            expect(first).toEqual(expect.objectContaining({ code: 'BAD_RESPONSE' }));
+            expect(second).toEqual(expect.objectContaining({ code: 'BAD_RESPONSE' }));
             expect(fetchMock).toHaveBeenCalledTimes(2);
         });
     });
