@@ -1,0 +1,111 @@
+import { afterEach, describe, expect, mock, test } from 'bun:test';
+
+import { translate, TranslateError } from '../index.js';
+
+const originalFetch = globalThis.fetch;
+const currentHour = Math.floor(Date.now() / 3_600_000);
+
+const responseBody = [
+    [['Bonjour', 'Hello', undefined, undefined, 1]],
+    undefined,
+    'en',
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    ['<b><i>Hello</i></b>', undefined, undefined, undefined, undefined, true],
+    [['fr']]
+];
+
+const installFetch = (translationResponse: Response) => {
+    const fetchMock = mock((input: string | URL | Request) => {
+        const url = new URL(input instanceof Request ? input.url : input);
+        if (url.pathname === '/') {
+            return Promise.resolve(new Response(`tkk: '${currentHour}.0'`));
+        }
+        return Promise.resolve(translationResponse);
+    });
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    return fetchMock;
+};
+
+const getRejection = async (promise: Promise<unknown>): Promise<unknown> => {
+    try {
+        await promise;
+    } catch (error) {
+        return error;
+    }
+    throw new Error('Expected promise to reject');
+};
+
+afterEach(() => {
+    globalThis.fetch = originalFetch;
+});
+
+describe('translate', () => {
+    test('translates text and parses correction metadata', async () => {
+        const fetchMock = installFetch(Response.json(responseBody));
+        const options = { from: 'English', to: 'French', tld: 'ca' };
+
+        const result = await translate('Hello', options);
+
+        expect(result).toEqual({
+            text: 'Bonjour',
+            from: {
+                language: { iso: 'en', didYouMean: 'fr' },
+                text: { value: '[Hello]', autoCorrected: true }
+            }
+        });
+        expect(options).toEqual({ from: 'English', to: 'French', tld: 'ca' });
+
+        const request = fetchMock.mock.calls
+            .map(([input]) => new URL(input instanceof Request ? input.url : input))
+            .find(url => url.pathname.endsWith('/translate_a/single'));
+        expect(request?.hostname).toBe('translate.google.ca');
+        expect(request?.searchParams.get('sl')).toBe('en');
+        expect(request?.searchParams.get('tl')).toBe('fr');
+        expect(request?.searchParams.get('q')).toBe('Hello');
+        expect(request?.searchParams.get('tk')).toMatch(/^\d+\.\d+$/);
+        expect(request?.searchParams.getAll('dt')).toHaveLength(10);
+    });
+
+    test('returns the untouched response in raw mode', async () => {
+        const raw = { arbitrary: ['response'] };
+        installFetch(Response.json(raw));
+
+        const result = await translate('Hello', { raw: true });
+        expect(result).toEqual(raw);
+    });
+
+    test('rejects unsupported languages before making a request', async () => {
+        const fetchMock = mock(() => Promise.resolve(new Response()));
+        globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+        const error = await getRejection(translate('nuqneH', { to: 'Klingon' }));
+        expect(error).toEqual(
+            expect.objectContaining({ code: 400, name: 'TranslateError' })
+        );
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    test('reports HTTP failures with a typed error', async () => {
+        installFetch(new Response('unavailable', { status: 503 }));
+
+        const error = await getRejection(translate('Hello'));
+        expect(error).toEqual(
+            expect.objectContaining({ code: 'BAD_RESPONSE', name: 'TranslateError' })
+        );
+    });
+
+    test('reports network failures with a typed error', async () => {
+        globalThis.fetch = mock(() => Promise.reject(new Error('offline'))) as unknown as typeof fetch;
+
+        try {
+            await translate('Hello');
+            throw new Error('Expected translate to reject');
+        } catch (error) {
+            expect(error).toBeInstanceOf(TranslateError);
+            expect((error as TranslateError).code).toBe('BAD_NETWORK');
+        }
+    });
+});
