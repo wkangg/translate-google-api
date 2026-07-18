@@ -3,8 +3,6 @@ import { afterEach, describe, expect, mock, test } from 'bun:test';
 import { translate, TranslateError } from '../index.js';
 
 const originalFetch = globalThis.fetch;
-const currentHour = Math.floor(Date.now() / 3_600_000);
-
 const responseBody = [
     [['Bonjour', 'Hello', undefined, undefined, 1]],
     undefined,
@@ -18,12 +16,8 @@ const responseBody = [
 ];
 
 const installFetch = (translationResponse: Response) => {
-    const fetchMock = mock((input: string | URL | Request, _init?: RequestInit) => {
-        void _init;
-        const url = new URL(input instanceof Request ? input.url : input);
-        if (url.pathname === '/') {
-            return Promise.resolve(new Response(`tkk: '${currentHour}.0'`));
-        }
+    const fetchMock = mock((input: string | URL | Request) => {
+        void input;
         return Promise.resolve(translationResponse);
     });
     globalThis.fetch = fetchMock as unknown as typeof fetch;
@@ -55,15 +49,6 @@ describe('translate', () => {
         expect(fetchMock).not.toHaveBeenCalled();
     });
 
-    test('rejects an unusable token response', async () => {
-        globalThis.fetch = mock(() => Promise.resolve(new Response('missing token'))) as unknown as typeof fetch;
-
-        const error = await getRejection(translate('Hello'));
-        expect(error).toEqual(
-            expect.objectContaining({ code: 'BAD_RESPONSE', name: 'TranslateError' })
-        );
-    });
-
     test('translates text and parses correction metadata', async () => {
         const fetchMock = installFetch(Response.json(responseBody));
         const options = { from: 'English', to: 'French', tld: 'ca' };
@@ -86,11 +71,9 @@ describe('translate', () => {
         expect(request?.searchParams.get('sl')).toBe('en');
         expect(request?.searchParams.get('tl')).toBe('fr');
         expect(request?.searchParams.get('q')).toBe('Hello');
-        expect(request?.searchParams.get('tk')).toMatch(/^\d+\.\d+$/);
+        expect(request?.searchParams.has('tk')).toBe(false);
         expect(request?.searchParams.getAll('dt')).toHaveLength(10);
-        const tokenRequest = fetchMock.mock.calls
-            .find(([input]) => new URL(input instanceof Request ? input.url : input).pathname === '/');
-        expect(tokenRequest?.[1]?.signal).toBeInstanceOf(AbortSignal);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 
     test('returns the untouched response in raw mode', async () => {

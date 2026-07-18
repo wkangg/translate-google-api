@@ -1,4 +1,3 @@
-import { generateToken } from './util/token.js';
 import { getCode, isSupported } from './util/language.js';
 import { TranslateError } from './errors.js';
 import { validateGoogleTld } from './util/tld.js';
@@ -90,7 +89,6 @@ export async function translate(text: string, options: TranslateOptions = {}): P
     const from = options.from ? getCode(options.from) : 'auto';
     const to = options.to ? getCode(options.to) : 'en';
     const tld = validateGoogleTld(options.tld);
-    const token = await generateToken(text, { tld });
     const parameters = new URLSearchParams({
         client: options.client ?? 'gtx',
         sl: from ?? 'auto',
@@ -102,8 +100,7 @@ export async function translate(text: string, options: TranslateOptions = {}): P
         ssel: '0',
         tsel: '0',
         kc: '7',
-        q: text,
-        [token.name]: token.value
+        q: text
     });
 
     for (const parameter of ['at', 'bd', 'ex', 'ld', 'md', 'qca', 'rw', 'rm', 'ss', 't']) {
