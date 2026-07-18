@@ -1,6 +1,6 @@
 {
   "name": "@william5553/translate-google-api",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "A dependency-free, fully typed client for Google Translate",
   "type": "module",
   "main": "./dist/index.js",
