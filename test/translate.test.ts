@@ -4,20 +4,21 @@ import { translate, TranslateError } from '../index.js';
 
 const originalFetch = globalThis.fetch;
 const responseBody = [
-    [['Bonjour', 'Hello', undefined, undefined, 1]],
-    undefined,
+    [['Bonjour', 'Hello', null, null, 1]],
+    null,
     'en',
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    ['<b><i>Hello</i></b>', undefined, undefined, undefined, undefined, true],
+    null,
+    null,
+    null,
+    null,
+    ['<b><i>Hello</i></b>', null, null, null, null, true],
     [['fr']]
 ];
 
 const installFetch = (translationResponse: Response) => {
-    const fetchMock = mock((input: string | URL | Request) => {
+    const fetchMock = mock((input: string | URL | Request, init?: RequestInit) => {
         void input;
+        void init;
         return Promise.resolve(translationResponse);
     });
     globalThis.fetch = fetchMock as unknown as typeof fetch;
@@ -70,7 +71,7 @@ describe('translate', () => {
         expect(request?.hostname).toBe('translate.google.ca');
         expect(request?.searchParams.get('sl')).toBe('en');
         expect(request?.searchParams.get('tl')).toBe('fr');
-        expect(request?.searchParams.get('q')).toBe('Hello');
+        expect(request?.searchParams.has('q')).toBe(false);
         expect(request?.searchParams.has('tk')).toBe(false);
         expect(request?.searchParams.getAll('dt')).toHaveLength(10);
         expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -174,13 +175,13 @@ describe('translate', () => {
     test('omits optional correction fields when there is no suggestion', async () => {
         const body = [
             [['Bonjour']],
-            undefined,
+            null,
             'fr',
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
+            null,
+            null,
+            null,
+            null,
+            null,
             [['fr']]
         ];
         installFetch(Response.json(body));
@@ -199,13 +200,13 @@ describe('translate', () => {
     test('flags a spelling suggestion that was not auto-corrected', async () => {
         const body = [
             [['Hello']],
-            undefined,
+            null,
             'en',
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            ['<b><i>Hello</i></b>', undefined, undefined, undefined, undefined, false],
+            null,
+            null,
+            null,
+            null,
+            ['<b><i>Hello</i></b>', null, null, null, null, false],
             [['en']]
         ];
         installFetch(Response.json(body));
@@ -224,11 +225,91 @@ describe('translate', () => {
         );
     });
 
+    test('sends the text in a form-encoded body so long input is not limited by URL length', async () => {
+        const fetchMock = installFetch(Response.json(responseBody));
+        const text = '你好世界。'.repeat(2000);
+
+        await translate(text);
+
+        const init = fetchMock.mock.calls[0]?.[1];
+        expect(init?.method).toBe('POST');
+        expect(init?.body).toBeInstanceOf(URLSearchParams);
+        expect((init?.body as URLSearchParams).get('q')).toBe(text);
+    });
+
+    test('rejects an automatic target language before making a request', async () => {
+        const fetchMock = mock(() => Promise.resolve(new Response()));
+        globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+        const error = await getRejection(translate('Hello', { to: 'auto' }));
+        expect(error).toEqual(
+            expect.objectContaining({ code: 400, name: 'TranslateError' })
+        );
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    test('passes the abort signal through and rethrows the abort reason', async () => {
+        const controller = new AbortController();
+        const reason = new DOMException('Timed out', 'TimeoutError');
+        const fetchMock = mock((_input: string | URL | Request, init?: RequestInit) => {
+            expect(init?.signal).toBe(controller.signal);
+            controller.abort(reason);
+            return Promise.reject(new DOMException('The operation was aborted.', 'AbortError'));
+        });
+        globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+        const error = await getRejection(translate('Hello', { signal: controller.signal }));
+        expect(error).toBe(reason);
+    });
+
     test('returns the raw response even when the body is malformed', async () => {
         const malformed = { unexpected: true };
         installFetch(Response.json(malformed));
 
         const result = await translate('Hello', { raw: true });
         expect(result).toEqual(malformed);
+    });
+
+    test('joins sentence segments and skips the transliteration segment', async () => {
+        const body = [
+            [
+                ['Hello. ', '你好。', null, null, 10],
+                ['World.', '世界。', null, null, 10],
+                [null, null, 'Hello. World.', 'Nǐ hǎo. Shìjiè.']
+            ],
+            null,
+            'zh-CN'
+        ];
+        installFetch(Response.json(body));
+
+        const result = await translate('你好。世界。');
+
+        expect(result.text).toBe('Hello. World.');
+        expect(result.from.language.iso).toBe('zh-CN');
+    });
+
+    test('rethrows the abort reason when the signal aborts while reading the body', async () => {
+        const controller = new AbortController();
+        const reason = new DOMException('Timed out', 'TimeoutError');
+        const response = {
+            ok: true,
+            json: () => {
+                controller.abort(reason);
+                return Promise.reject(new DOMException('The operation was aborted.', 'AbortError'));
+            }
+        } as unknown as Response;
+        installFetch(response);
+
+        const error = await getRejection(translate('Hello', { signal: controller.signal }));
+        expect(error).toBe(reason);
+    });
+
+    test('accepts multi-part TLDs regardless of case', async () => {
+        const fetchMock = installFetch(Response.json(responseBody));
+
+        await translate('Hello', { tld: 'CO.UK' });
+
+        const [input] = fetchMock.mock.calls[0]!;
+        expect(new URL(input instanceof Request ? input.url : input).hostname).toBe('translate.google.co.uk');
     });
 });

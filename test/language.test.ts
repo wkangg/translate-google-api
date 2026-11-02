@@ -30,8 +30,49 @@ describe('language helpers', () => {
         expect(getCode('ZH-CN')).toBe('zh-CN');
     });
 
+    test('accepts modern ISO codes for languages Google lists under legacy codes', () => {
+        expect(getCode('he')).toBe('iw');
+        expect(getCode('jv')).toBe('jw');
+        expect(getCode('zh')).toBe('zh-CN');
+        expect(getCode('FIL')).toBe('tl');
+    });
+
+    test('prefers codes over names in case-insensitive lookups', () => {
+        expect(getCode('ga')).toBe('ga');
+        expect(getCode('GA')).toBe('ga');
+        expect(getCode('Ga')).toBe('gaa');
+        expect(getCode('Irish')).toBe('ga');
+    });
+
+    test('does not resolve inherited object properties', () => {
+        expect(getCode('constructor')).toBeUndefined();
+        expect(getCode('__proto__')).toBeUndefined();
+    });
+
     test('resolves language names containing parentheses regardless of case', () => {
         expect(getCode('Chinese (Simplified)')).toBe('zh-CN');
         expect(getCode('chinese (simplified)')).toBe('zh-CN');
+    });
+
+    test('has unique language codes and case-insensitively unique names', () => {
+        const codes = Object.values(langs).map(code => code.toLowerCase());
+        const names = Object.keys(langs).map(name => name.toLowerCase());
+
+        expect(new Set(codes).size).toBe(codes.length);
+        expect(new Set(names).size).toBe(names.length);
+    });
+
+    test('resolves every language code to itself in any case', () => {
+        for (const code of Object.values(langs)) {
+            expect(getCode(code)).toBe(code);
+            expect(getCode(code.toUpperCase())).toBe(code);
+            expect(getCode(code.toLowerCase())).toBe(code);
+        }
+    });
+
+    test('resolves every language name to its code', () => {
+        for (const [name, code] of Object.entries(langs)) {
+            expect(getCode(name)).toBe(code);
+        }
     });
 });

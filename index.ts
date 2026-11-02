@@ -1,4 +1,4 @@
-import { getCode, isSupported } from './util/language.js';
+import { getCode } from './util/language.js';
 import { TranslateError } from './errors.js';
 import { validateGoogleTld } from './util/tld.js';
 
@@ -6,6 +6,8 @@ export interface TranslateOptions {
     client?: string;
     from?: string;
     raw?: boolean;
+    /** Aborts the request, e.g. `AbortSignal.timeout(5000)` */
+    signal?: AbortSignal;
     tld?: string;
     to?: string;
 }
@@ -33,6 +35,13 @@ const hasValidTranslationSegments = (body: unknown[]): boolean => {
         && segments.length > 0
         && segments.every(segment => Array.isArray(segment))
         && segments.some(segment => typeof segment[0] === 'string');
+};
+
+const resolveLanguage = (language: string | undefined, fallback: string): string => {
+    if (!language) return fallback;
+    const code = getCode(language);
+    if (!code) throw new TranslateError(`The language '${language}' is not supported`, 400);
+    return code;
 };
 
 const parseResponse = (body: unknown[]): TranslationResult => {
@@ -75,32 +84,29 @@ export async function translate(text: string, options: TranslateOptions): Promis
  * Translates text using Google Translate.
  *
  * @param text - The text to translate
- * @param options - Translation settings, including source and target languages, regional domain, client, and raw response mode
+ * @param options - Translation settings, including source and target languages, regional domain, client, abort signal, and raw response mode
  * @returns The structured translation result, or the unprocessed response when `options.raw` is `true`
  * @throws `TranslateError` if a language is unsupported, the request fails, Google Translate returns an unsuccessful status, or the response has an invalid format
  */
 export async function translate(text: string, options: TranslateOptions = {}): Promise<unknown> {
-    for (const language of [options.from, options.to]) {
-        if (language && !isSupported(language)) {
-            throw new TranslateError(`The language '${language}' is not supported`, 400);
-        }
+    const from = resolveLanguage(options.from, 'auto');
+    const to = resolveLanguage(options.to, 'en');
+    if (to === 'auto') {
+        throw new TranslateError('The target language cannot be automatic', 400);
     }
 
-    const from = options.from ? getCode(options.from) : 'auto';
-    const to = options.to ? getCode(options.to) : 'en';
     const tld = validateGoogleTld(options.tld);
     const parameters = new URLSearchParams({
         client: options.client ?? 'gtx',
-        sl: from ?? 'auto',
-        tl: to ?? 'en',
-        hl: to ?? 'en',
+        sl: from,
+        tl: to,
+        hl: to,
         ie: 'UTF-8',
         oe: 'UTF-8',
         otf: '1',
         ssel: '0',
         tsel: '0',
-        kc: '7',
-        q: text
+        kc: '7'
     });
 
     for (const parameter of ['at', 'bd', 'ex', 'ld', 'md', 'qca', 'rw', 'rm', 'ss', 't']) {
@@ -110,17 +116,20 @@ export async function translate(text: string, options: TranslateOptions = {}): P
     const url = new URL(`https://translate.google.${tld}/translate_a/single`);
     url.search = parameters.toString();
 
+    // The text goes in the body: Google rejects long query strings and body-less POSTs
     let response: Response;
     try {
         response = await fetch(url, {
             method: 'POST',
             headers: {
                 accept: 'application/json, text/plain, */*',
-                'content-type': 'application/json',
                 'x-requested-with': 'XMLHttpRequest'
-            }
+            },
+            body: new URLSearchParams({ q: text }),
+            signal: options.signal ?? null
         });
     } catch (error) {
+        if (options.signal?.aborted) throw options.signal.reason;
         throw new TranslateError('Unable to reach Google Translate', 'BAD_NETWORK', { cause: error });
     }
 
@@ -132,6 +141,7 @@ export async function translate(text: string, options: TranslateOptions = {}): P
     try {
         body = await response.json();
     } catch (error) {
+        if (options.signal?.aborted) throw options.signal.reason;
         throw new TranslateError('Google Translate returned invalid JSON', 'BAD_RESPONSE', { cause: error });
     }
     if (options.raw) return body;
