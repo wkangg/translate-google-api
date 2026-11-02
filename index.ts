@@ -99,8 +99,7 @@ export async function translate(text: string, options: TranslateOptions = {}): P
         otf: '1',
         ssel: '0',
         tsel: '0',
-        kc: '7',
-        q: text
+        kc: '7'
     });
 
     for (const parameter of ['at', 'bd', 'ex', 'ld', 'md', 'qca', 'rw', 'rm', 'ss', 't']) {
@@ -110,15 +109,16 @@ export async function translate(text: string, options: TranslateOptions = {}): P
     const url = new URL(`https://translate.google.${tld}/translate_a/single`);
     url.search = parameters.toString();
 
+    // The text goes in the body: Google rejects long query strings and body-less POSTs
     let response: Response;
     try {
         response = await fetch(url, {
             method: 'POST',
             headers: {
                 accept: 'application/json, text/plain, */*',
-                'content-type': 'application/json',
                 'x-requested-with': 'XMLHttpRequest'
-            }
+            },
+            body: new URLSearchParams({ q: text })
         });
     } catch (error) {
         throw new TranslateError('Unable to reach Google Translate', 'BAD_NETWORK', { cause: error });

@@ -16,8 +16,9 @@ const responseBody = [
 ];
 
 const installFetch = (translationResponse: Response) => {
-    const fetchMock = mock((input: string | URL | Request) => {
+    const fetchMock = mock((input: string | URL | Request, init?: RequestInit) => {
         void input;
+        void init;
         return Promise.resolve(translationResponse);
     });
     globalThis.fetch = fetchMock as unknown as typeof fetch;
@@ -70,7 +71,7 @@ describe('translate', () => {
         expect(request?.hostname).toBe('translate.google.ca');
         expect(request?.searchParams.get('sl')).toBe('en');
         expect(request?.searchParams.get('tl')).toBe('fr');
-        expect(request?.searchParams.get('q')).toBe('Hello');
+        expect(request?.searchParams.has('q')).toBe(false);
         expect(request?.searchParams.has('tk')).toBe(false);
         expect(request?.searchParams.getAll('dt')).toHaveLength(10);
         expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -222,6 +223,18 @@ describe('translate', () => {
         expect(error).toEqual(
             expect.objectContaining({ code: 'BAD_RESPONSE', name: 'TranslateError' })
         );
+    });
+
+    test('sends the text in a form-encoded body so long input is not limited by URL length', async () => {
+        const fetchMock = installFetch(Response.json(responseBody));
+        const text = '你好世界。'.repeat(2000);
+
+        await translate(text);
+
+        const init = fetchMock.mock.calls[0]?.[1];
+        expect(init?.method).toBe('POST');
+        expect(init?.body).toBeInstanceOf(URLSearchParams);
+        expect((init?.body as URLSearchParams).get('q')).toBe(text);
     });
 
     test('returns the raw response even when the body is malformed', async () => {
