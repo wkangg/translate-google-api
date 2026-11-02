@@ -53,4 +53,26 @@ describe('language helpers', () => {
         expect(getCode('Chinese (Simplified)')).toBe('zh-CN');
         expect(getCode('chinese (simplified)')).toBe('zh-CN');
     });
+
+    test('has unique language codes and case-insensitively unique names', () => {
+        const codes = Object.values(langs).map(code => code.toLowerCase());
+        const names = Object.keys(langs).map(name => name.toLowerCase());
+
+        expect(new Set(codes).size).toBe(codes.length);
+        expect(new Set(names).size).toBe(names.length);
+    });
+
+    test('resolves every language code to itself in any case', () => {
+        for (const code of Object.values(langs)) {
+            expect(getCode(code)).toBe(code);
+            expect(getCode(code.toUpperCase())).toBe(code);
+            expect(getCode(code.toLowerCase())).toBe(code);
+        }
+    });
+
+    test('resolves every language name to its code', () => {
+        for (const [name, code] of Object.entries(langs)) {
+            expect(getCode(name)).toBe(code);
+        }
+    });
 });

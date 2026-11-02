@@ -269,4 +269,47 @@ describe('translate', () => {
         const result = await translate('Hello', { raw: true });
         expect(result).toEqual(malformed);
     });
+
+    test('joins sentence segments and skips the transliteration segment', async () => {
+        const body = [
+            [
+                ['Hello. ', '你好。', null, null, 10],
+                ['World.', '世界。', null, null, 10],
+                [null, null, 'Hello. World.', 'Nǐ hǎo. Shìjiè.']
+            ],
+            null,
+            'zh-CN'
+        ];
+        installFetch(Response.json(body));
+
+        const result = await translate('你好。世界。');
+
+        expect(result.text).toBe('Hello. World.');
+        expect(result.from.language.iso).toBe('zh-CN');
+    });
+
+    test('rethrows the abort reason when the signal aborts while reading the body', async () => {
+        const controller = new AbortController();
+        const reason = new DOMException('Timed out', 'TimeoutError');
+        const response = {
+            ok: true,
+            json: () => {
+                controller.abort(reason);
+                return Promise.reject(controller.signal.reason as Error);
+            }
+        } as unknown as Response;
+        installFetch(response);
+
+        const error = await getRejection(translate('Hello', { signal: controller.signal }));
+        expect(error).toBe(reason);
+    });
+
+    test('accepts multi-part TLDs regardless of case', async () => {
+        const fetchMock = installFetch(Response.json(responseBody));
+
+        await translate('Hello', { tld: 'CO.UK' });
+
+        const [input] = fetchMock.mock.calls[0]!;
+        expect(new URL(input instanceof Request ? input.url : input).hostname).toBe('translate.google.co.uk');
+    });
 });
