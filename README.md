@@ -72,12 +72,16 @@ console.log(langs);
 
 ## Errors
 
-`translate()` rejects with a `TranslateError` whose `code` is:
+`translate()` rejects with a `TranslateError` when an input is unsupported or the request fails.
+Its `code` is:
 
 - `400`: an unsupported language or Google domain, checked before any request is sent.
 - `'BAD_NETWORK'`: Google Translate could not be reached. The original error is in `cause`.
 - `'BAD_RESPONSE'`: Google returned an HTTP error (for example when rate limited), invalid JSON,
   or a response that could not be parsed.
+
+If `options.signal` aborts, `translate()` rejects with the signal's reason instead, which is not a
+`TranslateError`. For example, `AbortSignal.timeout()` rejects with a `TimeoutError` `DOMException`.
 
 ```ts
 import { translate, TranslateError } from '@william5553/translate-google-api';
@@ -86,5 +90,6 @@ try {
     await translate('Hello', { to: 'es', signal: AbortSignal.timeout(5000) });
 } catch (error) {
     if (error instanceof TranslateError) console.error(error.code, error.message);
+    else throw error;
 }
 ```
