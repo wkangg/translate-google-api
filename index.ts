@@ -129,7 +129,7 @@ export async function translate(text: string, options: TranslateOptions = {}): P
             signal: options.signal ?? null
         });
     } catch (error) {
-        if (options.signal?.aborted) throw error;
+        if (options.signal?.aborted) throw options.signal.reason;
         throw new TranslateError('Unable to reach Google Translate', 'BAD_NETWORK', { cause: error });
     }
 
@@ -141,7 +141,7 @@ export async function translate(text: string, options: TranslateOptions = {}): P
     try {
         body = await response.json();
     } catch (error) {
-        if (options.signal?.aborted) throw error;
+        if (options.signal?.aborted) throw options.signal.reason;
         throw new TranslateError('Google Translate returned invalid JSON', 'BAD_RESPONSE', { cause: error });
     }
     if (options.raw) return body;

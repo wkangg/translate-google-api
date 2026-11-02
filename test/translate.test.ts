@@ -254,7 +254,7 @@ describe('translate', () => {
         const fetchMock = mock((_input: string | URL | Request, init?: RequestInit) => {
             expect(init?.signal).toBe(controller.signal);
             controller.abort(reason);
-            return Promise.reject(controller.signal.reason as Error);
+            return Promise.reject(new DOMException('The operation was aborted.', 'AbortError'));
         });
         globalThis.fetch = fetchMock as unknown as typeof fetch;
 
@@ -295,7 +295,7 @@ describe('translate', () => {
             ok: true,
             json: () => {
                 controller.abort(reason);
-                return Promise.reject(controller.signal.reason as Error);
+                return Promise.reject(new DOMException('The operation was aborted.', 'AbortError'));
             }
         } as unknown as Response;
         installFetch(response);
