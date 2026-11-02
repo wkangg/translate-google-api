@@ -6,6 +6,8 @@ export interface TranslateOptions {
     client?: string;
     from?: string;
     raw?: boolean;
+    /** Aborts the request, e.g. `AbortSignal.timeout(5000)` */
+    signal?: AbortSignal;
     tld?: string;
     to?: string;
 }
@@ -82,7 +84,7 @@ export async function translate(text: string, options: TranslateOptions): Promis
  * Translates text using Google Translate.
  *
  * @param text - The text to translate
- * @param options - Translation settings, including source and target languages, regional domain, client, and raw response mode
+ * @param options - Translation settings, including source and target languages, regional domain, client, abort signal, and raw response mode
  * @returns The structured translation result, or the unprocessed response when `options.raw` is `true`
  * @throws `TranslateError` if a language is unsupported, the request fails, Google Translate returns an unsuccessful status, or the response has an invalid format
  */
@@ -123,9 +125,11 @@ export async function translate(text: string, options: TranslateOptions = {}): P
                 accept: 'application/json, text/plain, */*',
                 'x-requested-with': 'XMLHttpRequest'
             },
-            body: new URLSearchParams({ q: text })
+            body: new URLSearchParams({ q: text }),
+            signal: options.signal ?? null
         });
     } catch (error) {
+        if (options.signal?.aborted) throw error;
         throw new TranslateError('Unable to reach Google Translate', 'BAD_NETWORK', { cause: error });
     }
 
@@ -137,6 +141,7 @@ export async function translate(text: string, options: TranslateOptions = {}): P
     try {
         body = await response.json();
     } catch (error) {
+        if (options.signal?.aborted) throw error;
         throw new TranslateError('Google Translate returned invalid JSON', 'BAD_RESPONSE', { cause: error });
     }
     if (options.raw) return body;

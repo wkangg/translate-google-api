@@ -56,6 +56,8 @@ interface TranslationResult {
 - `options.tld` (`string`, default `com`): Google Translate domain suffix, such as `ca`.
 - `options.client` (`string`, default `gtx`): Google Translate client identifier.
 - `options.raw` (`boolean`, default `false`): return Google's response without parsing it.
+- `options.signal` (`AbortSignal`): cancels the request. If it aborts, `translate()` rejects
+  with the signal's reason, for example `AbortSignal.timeout(5000)`.
 
 Language names and codes are case-insensitive. The package also exports `langs`, `getCode`,
 `isSupported`, and `TranslateError`.

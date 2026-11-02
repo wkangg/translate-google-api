@@ -248,6 +248,20 @@ describe('translate', () => {
         expect(fetchMock).not.toHaveBeenCalled();
     });
 
+    test('passes the abort signal through and rethrows the abort reason', async () => {
+        const controller = new AbortController();
+        const reason = new DOMException('Timed out', 'TimeoutError');
+        const fetchMock = mock((_input: string | URL | Request, init?: RequestInit) => {
+            expect(init?.signal).toBe(controller.signal);
+            controller.abort(reason);
+            return Promise.reject(controller.signal.reason as Error);
+        });
+        globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+        const error = await getRejection(translate('Hello', { signal: controller.signal }));
+        expect(error).toBe(reason);
+    });
+
     test('returns the raw response even when the body is malformed', async () => {
         const malformed = { unexpected: true };
         installFetch(Response.json(malformed));
