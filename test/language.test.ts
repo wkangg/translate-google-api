@@ -30,6 +30,13 @@ describe('language helpers', () => {
         expect(getCode('ZH-CN')).toBe('zh-CN');
     });
 
+    test('accepts modern ISO codes for languages Google lists under legacy codes', () => {
+        expect(getCode('he')).toBe('iw');
+        expect(getCode('jv')).toBe('jw');
+        expect(getCode('zh')).toBe('zh-CN');
+        expect(getCode('FIL')).toBe('tl');
+    });
+
     test('prefers codes over names in case-insensitive lookups', () => {
         expect(getCode('ga')).toBe('ga');
         expect(getCode('GA')).toBe('ga');

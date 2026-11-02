@@ -261,10 +261,19 @@ export const langs = {
 export type LanguageName = keyof typeof langs;
 export type LanguageCode = typeof langs[LanguageName];
 
-// Lower-cased names, then codes; later entries win, so 'ga' is Irish rather than the language Ga
+// Modern ISO 639 codes that Google also accepts in place of its legacy ones
+const aliases: Record<string, LanguageCode> = {
+    fil: 'tl',
+    he: 'iw',
+    jv: 'jw',
+    zh: 'zh-CN'
+};
+
+// Lower-cased names, then codes, then aliases; later entries win, so 'ga' is Irish rather than the language Ga
 const lookup = new Map<string, LanguageCode>([
     ...Object.entries(langs).map(([name, code]) => [name.toLowerCase(), code] as const),
-    ...Object.values(langs).map(code => [code.toLowerCase(), code] as const)
+    ...Object.values(langs).map(code => [code.toLowerCase(), code] as const),
+    ...Object.entries(aliases)
 ]);
 
 export const getCode = (language: string): LanguageCode | undefined => {
