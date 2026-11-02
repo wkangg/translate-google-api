@@ -1,4 +1,4 @@
-import { getCode, isSupported } from './util/language.js';
+import { getCode } from './util/language.js';
 import { TranslateError } from './errors.js';
 import { validateGoogleTld } from './util/tld.js';
 
@@ -33,6 +33,13 @@ const hasValidTranslationSegments = (body: unknown[]): boolean => {
         && segments.length > 0
         && segments.every(segment => Array.isArray(segment))
         && segments.some(segment => typeof segment[0] === 'string');
+};
+
+const resolveLanguage = (language: string | undefined, fallback: string): string => {
+    if (!language) return fallback;
+    const code = getCode(language);
+    if (!code) throw new TranslateError(`The language '${language}' is not supported`, 400);
+    return code;
 };
 
 const parseResponse = (body: unknown[]): TranslationResult => {
@@ -80,20 +87,18 @@ export async function translate(text: string, options: TranslateOptions): Promis
  * @throws `TranslateError` if a language is unsupported, the request fails, Google Translate returns an unsuccessful status, or the response has an invalid format
  */
 export async function translate(text: string, options: TranslateOptions = {}): Promise<unknown> {
-    for (const language of [options.from, options.to]) {
-        if (language && !isSupported(language)) {
-            throw new TranslateError(`The language '${language}' is not supported`, 400);
-        }
+    const from = resolveLanguage(options.from, 'auto');
+    const to = resolveLanguage(options.to, 'en');
+    if (to === 'auto') {
+        throw new TranslateError('The target language cannot be automatic', 400);
     }
 
-    const from = options.from ? getCode(options.from) : 'auto';
-    const to = options.to ? getCode(options.to) : 'en';
     const tld = validateGoogleTld(options.tld);
     const parameters = new URLSearchParams({
         client: options.client ?? 'gtx',
-        sl: from ?? 'auto',
-        tl: to ?? 'en',
-        hl: to ?? 'en',
+        sl: from,
+        tl: to,
+        hl: to,
         ie: 'UTF-8',
         oe: 'UTF-8',
         otf: '1',

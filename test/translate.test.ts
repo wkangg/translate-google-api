@@ -237,6 +237,17 @@ describe('translate', () => {
         expect((init?.body as URLSearchParams).get('q')).toBe(text);
     });
 
+    test('rejects an automatic target language before making a request', async () => {
+        const fetchMock = mock(() => Promise.resolve(new Response()));
+        globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+        const error = await getRejection(translate('Hello', { to: 'auto' }));
+        expect(error).toEqual(
+            expect.objectContaining({ code: 400, name: 'TranslateError' })
+        );
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
     test('returns the raw response even when the body is malformed', async () => {
         const malformed = { unexpected: true };
         installFetch(Response.json(malformed));
