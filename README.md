@@ -69,3 +69,22 @@ getCode('French'); // 'fr'
 isSupported('fr'); // true
 console.log(langs);
 ```
+
+## Errors
+
+`translate()` rejects with a `TranslateError` whose `code` is:
+
+- `400`: an unsupported language or Google domain, checked before any request is sent.
+- `'BAD_NETWORK'`: Google Translate could not be reached. The original error is in `cause`.
+- `'BAD_RESPONSE'`: Google returned an HTTP error (for example when rate limited), invalid JSON,
+  or a response that could not be parsed.
+
+```ts
+import { translate, TranslateError } from '@william5553/translate-google-api';
+
+try {
+    await translate('Hello', { to: 'es', signal: AbortSignal.timeout(5000) });
+} catch (error) {
+    if (error instanceof TranslateError) console.error(error.code, error.message);
+}
+```
