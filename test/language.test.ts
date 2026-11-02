@@ -30,6 +30,18 @@ describe('language helpers', () => {
         expect(getCode('ZH-CN')).toBe('zh-CN');
     });
 
+    test('prefers codes over names in case-insensitive lookups', () => {
+        expect(getCode('ga')).toBe('ga');
+        expect(getCode('GA')).toBe('ga');
+        expect(getCode('Ga')).toBe('gaa');
+        expect(getCode('Irish')).toBe('ga');
+    });
+
+    test('does not resolve inherited object properties', () => {
+        expect(getCode('constructor')).toBeUndefined();
+        expect(getCode('__proto__')).toBeUndefined();
+    });
+
     test('resolves language names containing parentheses regardless of case', () => {
         expect(getCode('Chinese (Simplified)')).toBe('zh-CN');
         expect(getCode('chinese (simplified)')).toBe('zh-CN');

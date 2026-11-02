@@ -261,15 +261,15 @@ export const langs = {
 export type LanguageName = keyof typeof langs;
 export type LanguageCode = typeof langs[LanguageName];
 
+// Lower-cased names, then codes; later entries win, so 'ga' is Irish rather than the language Ga
+const lookup = new Map<string, LanguageCode>([
+    ...Object.entries(langs).map(([name, code]) => [name.toLowerCase(), code] as const),
+    ...Object.values(langs).map(code => [code.toLowerCase(), code] as const)
+]);
+
 export const getCode = (language: string): LanguageCode | undefined => {
-    if (!language) return;
     if (Object.hasOwn(langs, language)) return langs[language as LanguageName];
-
-    const normalized = language.toLowerCase();
-    const key = (Object.keys(langs) as LanguageName[])
-        .find(item => langs[item].toLowerCase() === normalized || item.toLowerCase() === normalized);
-
-    return key ? langs[key] : undefined;
+    return lookup.get(language.toLowerCase());
 };
 
 export const isSupported = (language: string): boolean => Boolean(getCode(language));
