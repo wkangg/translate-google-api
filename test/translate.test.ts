@@ -4,14 +4,14 @@ import { translate, TranslateError } from '../index.js';
 
 const originalFetch = globalThis.fetch;
 const responseBody = [
-    [['Bonjour', 'Hello', undefined, undefined, 1]],
-    undefined,
+    [['Bonjour', 'Hello', null, null, 1]],
+    null,
     'en',
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    ['<b><i>Hello</i></b>', undefined, undefined, undefined, undefined, true],
+    null,
+    null,
+    null,
+    null,
+    ['<b><i>Hello</i></b>', null, null, null, null, true],
     [['fr']]
 ];
 
@@ -175,13 +175,13 @@ describe('translate', () => {
     test('omits optional correction fields when there is no suggestion', async () => {
         const body = [
             [['Bonjour']],
-            undefined,
+            null,
             'fr',
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
+            null,
+            null,
+            null,
+            null,
+            null,
             [['fr']]
         ];
         installFetch(Response.json(body));
@@ -200,13 +200,13 @@ describe('translate', () => {
     test('flags a spelling suggestion that was not auto-corrected', async () => {
         const body = [
             [['Hello']],
-            undefined,
+            null,
             'en',
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            ['<b><i>Hello</i></b>', undefined, undefined, undefined, undefined, false],
+            null,
+            null,
+            null,
+            null,
+            ['<b><i>Hello</i></b>', null, null, null, null, false],
             [['en']]
         ];
         installFetch(Response.json(body));

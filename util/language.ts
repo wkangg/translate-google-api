@@ -276,9 +276,8 @@ const lookup = new Map<string, LanguageCode>([
     ...Object.entries(aliases)
 ]);
 
-export const getCode = (language: string): LanguageCode | undefined => {
-    if (Object.hasOwn(langs, language)) return langs[language as LanguageName];
-    return lookup.get(language.toLowerCase());
-};
+export const getCode = (language: string): LanguageCode | undefined => Object.hasOwn(langs, language)
+    ? langs[language as LanguageName]
+    : lookup.get(language.toLowerCase());
 
 export const isSupported = (language: string): boolean => Boolean(getCode(language));

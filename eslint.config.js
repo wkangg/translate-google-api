@@ -41,6 +41,7 @@ const sharedRules = {
     'prefer-object-has-own': 'error',
     'unicorn/filename-case': 'off',
     'unicorn/no-array-for-each': 'off',
+    'unicorn/no-asterisk-prefix-in-documentation-comments': 'off',
     'unicorn/no-nested-ternary': 'off',
     'unicorn/no-null': 'off',
     'unicorn/numeric-separators-style': 'off',
@@ -51,6 +52,7 @@ const sharedRules = {
     'unicorn/prefer-string-replace-all': 'error',
     'unicorn/prefer-top-level-await': 'off',
     'unicorn/prevent-abbreviations': 'off',
+    'unicorn/single-line-block-comment-style': 'off',
     'unicorn/switch-case-braces': ['error', 'avoid'],
     'unicorn/text-encoding-identifier-case': 'off',
     'yoda': ['error', 'never', { exceptRange: true }]
